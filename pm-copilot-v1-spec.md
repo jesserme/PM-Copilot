@@ -20,7 +20,7 @@ These five decisions shape everything below. They are also the first five entrie
 
 ## 1. Intake schema
 
-Target: completable in under 5 minutes. Nine fields, five required. Placeholder/helper text is part of the product voice — ship these strings, don't lorem-ipsum them.
+Target: completable in under 5 minutes. Nine fields, six required. Placeholder/helper text is part of the product voice — ship these strings, don't lorem-ipsum them.
 
 | # | Field | Type | Req | Constraint | Helper text (ship this) | Why it exists |
 |---|-------|------|-----|-----------|------------------------|---------------|
