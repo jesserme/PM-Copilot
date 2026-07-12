@@ -1,0 +1,60 @@
+{
+  "_note": "Three IntakeForm objects for showcase mode (spec §6). Run each through scripts/pregenerate.ts once and commit the results to data/showcase/. 'focused' should fire ~0-1 checks, 'fuzzy' fires vague_audience + vanity_metric + no_target + no_evidence + no_assumption, 'kitchen_sink' fires kitchen_sink. Keys starting with _ are ignored by the pregenerate script.",
+
+  "focused": {
+    "feature_name": "Reply templates for the seller inbox",
+    "one_liner": "Reusable reply templates with auto-fill variables, inside the seller inbox.",
+    "target_user": "Solo Etsy-style shop owners handling 20+ buyer conversations a day",
+    "problem": "Sellers answer the same five questions — shipping time, sizing, customization, returns, delays — dozens of times a week. Today they copy-paste from a Notes app or retype from memory: slow, error-prone, and inconsistent answers show up in negative reviews.",
+    "evidence": "12 seller interviews in June; 8 of 12 unprompted showed me a personal notes doc of canned answers. Also the top tooling complaint in two seller-forum threads I pulled.",
+    "proposed_solution": "A templates drawer inside the inbox: save any sent reply as a template, insert one with two clicks, and variables auto-fill buyer name and order number. Ships with five starter templates.",
+    "success_metric": {
+      "metric": "Share of replies sent via template among sellers active in week 2",
+      "target": "40%",
+      "timeframe": "6_weeks"
+    },
+    "constraints": {
+      "team": "two_three",
+      "platform": "web"
+    },
+    "riskiest_assumption": "Buyers won't read templated replies as impersonal in a marketplace built on 'handmade.'"
+  },
+
+  "fuzzy": {
+    "feature_name": "AI Fitness Coach",
+    "one_liner": "An AI coach that builds personalized workout plans for everyone.",
+    "target_user": "Everyone who wants to get in shape",
+    "problem": "People download fitness apps but quit after a couple of weeks because they lose motivation. Existing apps are generic and don't keep users engaged over the long term.",
+    "evidence": "",
+    "proposed_solution": "An AI that generates a personalized workout plan and automatically adjusts it based on your progress, goals, and available equipment.",
+    "success_metric": {
+      "metric": "App downloads",
+      "target": "",
+      "timeframe": "quarter"
+    },
+    "constraints": {
+      "team": "solo",
+      "platform": "mobile"
+    },
+    "riskiest_assumption": ""
+  },
+
+  "kitchen_sink": {
+    "feature_name": "CampusHub",
+    "one_liner": "One app for everything students need on campus.",
+    "target_user": "Commuter students at large public universities",
+    "problem": "Commuter students miss out on campus life. Events are scattered across email, flyers, and five different apps; buying used textbooks means sketchy Facebook groups; and finding study partners is nearly impossible when you leave campus at 3pm.",
+    "evidence": "Informal survey of 40 students from my old commuter group chat; 31 said they usually hear about events after they've happened.",
+    "proposed_solution": "A campus super-app: a personalized events feed, a used textbook and furniture marketplace, study-group matching based on course schedules, campus food pickup and delivery, and an anonymous forum for questions and confessions.",
+    "success_metric": {
+      "metric": "Weekly active students at the pilot campus",
+      "target": "25% of enrolled commuters",
+      "timeframe": "quarter"
+    },
+    "constraints": {
+      "team": "two_three",
+      "platform": "both"
+    },
+    "riskiest_assumption": "Students will switch from the single-purpose apps they already use to an all-in-one."
+  }
+}
