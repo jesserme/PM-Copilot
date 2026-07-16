@@ -76,7 +76,7 @@ Each chip carries a tooltip labeled **"rule-based check"** — being transparent
 | `no_target` | `success_metric.target` empty | info | "Directional metric — you'll never be able to call this a win or a loss." |
 | `no_evidence` | `evidence` empty | info | "Hypothesis-only PRD. Legit for a v0 — the document will say so out loud." |
 | `no_assumption` | `riskiest_assumption` empty | info | "Every idea has one. Not being able to name it is itself the risk." |
-| `kitchen_sink` | `proposed_solution` joins ≥ 3 clauses with "and"/commas, OR length > 90% of limit | warn | "Reads like several features. Expect the generator to cut — the out-of-scope list will be long." |
+| `kitchen_sink` | `proposed_solution` contains ≥ 4 commas, OR ≥ 3 commas and a ":", OR length > 90% of limit | warn | "Reads like several features. Expect the generator to cut — the out-of-scope list will be long." |
 
 Implementation note: pure functions, `(form) => Flag[]`, unit-tested. This table is also portfolio material — it shows you encoded PM judgment as testable logic, which is exactly the "guardrails, not vibes" story.
 

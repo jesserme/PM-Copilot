@@ -4,7 +4,9 @@ Format per spec §7: **decision → alternatives considered → why → revisit 
 
 ## Spec errata
 
-- **2026-07-12 — §1 required-field count.** Prose said "Nine fields, five required"; the field table and the TS interface both mark six fields required (`success_metric` carries the ✅). Corrected the prose to "six required." The table was right, the prose was not.
+1. **2026-07-12 — §1 required-field count.** Prose said "Nine fields, five required"; the field table and the TS interface both mark six fields required (`success_metric` carries the ✅). Corrected the prose to "six required." The table was right, the prose was not.
+2. **2026-07-12 — §2 `vanity_metric` case sensitivity.** Shipped behavior matches both patterns case-insensitively (judgment call 2). Spec table row left as written — the bare patterns there read as illustrative, not as a case-sensitivity mandate.
+3. **2026-07-16 — §2 `kitchen_sink` trigger.** The clause-splitting trigger ("joins ≥ 3 clauses with 'and'/commas") false-positived on prose enumerations, including two of the three showcase inputs. Spec table row replaced with the comma-count trigger (≥ 4 commas, or ≥ 3 commas and a ":"); the > 90%-length trigger, severity, and user-facing message are unchanged. See decision 11.
 
 ## M1 judgment calls
 
@@ -80,6 +82,11 @@ Format per spec §7: **decision → alternatives considered → why → revisit 
 - **Why:** The spec ties its string to the parse-retry flow; reusing it for transport errors would misreport what happened.
 - **Revisit when:** Error-state copy is finalized in M6.
 
-## Open item — needs a ruling (raised at the M3 checkpoint)
+## Post-M3 ruling
 
-- **`kitchen_sink` vs the showcase expectations.** The literal spec §2 trigger (≥ 3 clauses joined by "and"/commas) fires on prose enumerations inside both showcase inputs — fuzzy's "…progress, goals, and available equipment" and focused's "save…, insert one…, and variables auto-fill…". `showcase-inputs.json`'s `_note` expects fuzzy to fire five checks (no kitchen_sink) and focused ~0–1. Spec table and note conflict; implementation follows the spec table and is unit-tested. Decision affects M5 pregeneration. Options presented at checkpoint.
+### 11. `kitchen_sink` v2 — comma-count trigger; " and " removed as a signal
+
+- **Decision:** (2026-07-16, resolving the M3 open item, option b) Fire on ≥ 4 commas, or ≥ 3 commas plus a ":", in `proposed_solution`; the > 90%-length trigger, severity, and user-facing message are unchanged. Clause splitting on " and " is deleted, and with it the hyphenated-compound special case it required. Showcase inputs stay exactly as written and are promoted to permanent test fixtures, pinned verbatim (fire: CampusHub; no-fire: Fuzzy, Focused).
+- **Alternatives considered:** Keep the v1 clause-splitting trigger (false-positives on showcase prose); reword the showcase solutions to dodge the trigger (hides the bug and edits product fixtures to fit a heuristic).
+- **Why:** The rule layer is tuned for precision because the costs are asymmetric: a false RULE chip presents itself as deterministic fact and erodes the credibility the panel is built on, while a missed enumeration is backstopped by the model layer, which owns semantic scope judgment — and since the model receives the fired-ids list, an un-fired `kitchen_sink` leaves it free to raise scope itself. " and " is removed as a signal because prose conjunctions are overwhelmingly benign connectors, not feature seams.
+- **Revisit when:** Real inputs show list-style solutions with ≤ 3 commas slipping past both layers, or the corpus gains cases the comma rule cannot separate.

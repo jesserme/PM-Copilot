@@ -173,17 +173,35 @@ describe("kitchen_sink", () => {
       "Reads like several features. Expect the generator to cut — the out-of-scope list will be long.",
   };
 
+  // Corpus pinned verbatim by the kitchen_sink v2 ruling (DECISIONS.md #11):
+  // ≥ 4 commas, or ≥ 3 commas plus a ":", or > 90% of the length limit.
   it.each([
-    "Add dashboards, CSV export, and Slack alerts",
-    "Build an editor and a publish flow and analytics",
-    "Uploads, tagging, search",
-  ])("fires when ≥ 3 clauses are joined: %j", (proposed_solution) => {
+    // CampusHub showcase solution — 4 commas
+    "A campus super-app: a personalized events feed, a used textbook and furniture marketplace, study-group matching based on course schedules, campus food pickup and delivery, and an anonymous forum for questions and confessions.",
+    "Uploads, tagging, search, comments, and version history.",
+    "Features: uploads, tagging, search, and comments.",
+  ])("fires on %j", (proposed_solution) => {
     const flags = kitchenSink(form({ proposed_solution }));
     expect(flags).toHaveLength(1);
     expect(flags[0]).toEqual(expectedFlag);
   });
 
-  it("fires when length exceeds 90% of the limit even as a single clause", () => {
+  it.each([
+    // Fuzzy showcase solution — 2 commas
+    "An AI that generates a personalized workout plan and automatically adjusts it based on your progress, goals, and available equipment.",
+    // Focused showcase solution — 2 commas, colon alone is not enough
+    "A templates drawer inside the inbox: save any sent reply as a template, insert one with two clicks, and variables auto-fill buyer name and order number. Ships with five starter templates.",
+    "drag-and-drop editing",
+    // 3 commas but no colon
+    "For sellers, a dashboard showing orders, refunds, and disputes.",
+    // 2-comma enumeration — the model layer owns this call now
+    "Add dashboards, CSV export, and Slack alerts",
+    "A single drag-to-reorder screen for listing photos.",
+  ])("does not fire on %j", (proposed_solution) => {
+    expect(kitchenSink(form({ proposed_solution }))).toEqual([]);
+  });
+
+  it("fires when length exceeds 90% of the limit even without commas", () => {
     const overLimit = "x".repeat(Math.floor(INTAKE_LIMITS.proposed_solution * 0.9) + 1);
     const flags = kitchenSink(form({ proposed_solution: overLimit }));
     expect(flags).toHaveLength(1);
@@ -193,14 +211,6 @@ describe("kitchen_sink", () => {
   it("does not fire at exactly 90% of the limit", () => {
     const atLimit = "x".repeat(INTAKE_LIMITS.proposed_solution * 0.9);
     expect(kitchenSink(form({ proposed_solution: atLimit }))).toEqual([]);
-  });
-
-  it.each([
-    "A single drag-to-reorder screen for listing photos.",
-    "Record calls and transcribe them", // two clauses is fine
-    "A drag-and-drop editor for photos", // hyphenated "and" is not a clause join
-  ])("does not fire on %j", (proposed_solution) => {
-    expect(kitchenSink(form({ proposed_solution }))).toEqual([]);
   });
 });
 
@@ -216,7 +226,7 @@ describe("runChecks", () => {
       target_user: "everyone",
       problem: "People are busy.",
       evidence: undefined,
-      proposed_solution: "Dashboards, exports, alerts, and AI summaries",
+      proposed_solution: "Dashboards, exports, alerts, summaries, and AI audit logs",
       success_metric: { metric: "signups", timeframe: "other" },
       riskiest_assumption: undefined,
     };

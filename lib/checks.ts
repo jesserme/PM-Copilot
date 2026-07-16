@@ -94,15 +94,16 @@ export function noAssumption(form: IntakeForm): Flag[] {
   ];
 }
 
-// Splits on commas and on " and " surrounded by whitespace, so hyphenated
-// compounds like "drag-and-drop" don't count as clause joins.
-const CLAUSE_JOIN = /,|\s+and\s+/i;
-
+// Comma-count trigger (spec §2 as amended by erratum 3): enumeration density,
+// not clause splitting. " and " is deliberately not a signal — prose
+// conjunctions are benign connectors, and the model layer owns semantic scope
+// judgment; this rule only catches unmistakable lists.
 export function kitchenSink(form: IntakeForm): Flag[] {
   const text = form.proposed_solution;
-  const clauses = text.split(CLAUSE_JOIN).filter((c) => c.trim().length > 0);
+  const commaCount = (text.match(/,/g) ?? []).length;
+  const enumerated = commaCount >= 4 || (commaCount >= 3 && text.includes(":"));
   const nearLimit = text.length > INTAKE_LIMITS.proposed_solution * 0.9;
-  if (clauses.length < 3 && !nearLimit) return [];
+  if (!enumerated && !nearLimit) return [];
   return [
     {
       id: "kitchen_sink",
