@@ -4,13 +4,16 @@ import { INTAKE_LIMITS, type IntakeForm } from "./schema";
 // no React, no side effects. Runs client-side on field blur and on submit.
 // User-facing messages are shipped verbatim from the spec — do not rephrase.
 
-export type CheckId =
-  | "vague_audience"
-  | "vanity_metric"
-  | "no_target"
-  | "no_evidence"
-  | "no_assumption"
-  | "kitchen_sink";
+export const CHECK_IDS = [
+  "vague_audience",
+  "vanity_metric",
+  "no_target",
+  "no_evidence",
+  "no_assumption",
+  "kitchen_sink",
+] as const;
+
+export type CheckId = (typeof CHECK_IDS)[number];
 
 export type FlagSeverity = "info" | "warn";
 

@@ -122,6 +122,11 @@ export const GenerationResultSchema = z.object({
   meta: MetaSchema,
 });
 
+// What the model itself returns: the result minus `meta`, which the server
+// assembles (timestamp, model id, input hash) after validating the payload.
+export const GenerationPayloadSchema = GenerationResultSchema.omit({ meta: true });
+
+export type GenerationPayload = z.infer<typeof GenerationPayloadSchema>;
 export type GenerationResult = z.infer<typeof GenerationResultSchema>;
 export type Prd = z.infer<typeof PrdSchema>;
 export type Critique = z.infer<typeof CritiqueSchema>;

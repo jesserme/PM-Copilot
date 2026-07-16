@@ -256,7 +256,7 @@ export default function IntakeForm() {
       return;
     }
     setShowErrors(false);
-    setSubmitState("ready"); // M3 replaces this with POST /api/generate.
+    setSubmitState("ready"); // M4 wires this to POST /api/generate + results view.
   }
 
   const flagsFor = (field: keyof IntakeForm) => visibleFlags.filter((f) => f.field === field);
@@ -558,7 +558,7 @@ export default function IntakeForm() {
         </button>
         {submitState === "ready" && (
           <p className="mt-3 text-sm text-zinc-500">
-            Inputs are valid. The generation pipeline arrives in M3.
+            Inputs are valid. The results view arrives in M4.
           </p>
         )}
       </div>
