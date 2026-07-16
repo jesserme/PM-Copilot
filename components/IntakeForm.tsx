@@ -6,13 +6,30 @@ import FlagChip from "./FlagChip";
 import { runChecks, type Flag } from "@/lib/checks";
 import {
   ConstraintsSchema,
+  GenerationResultSchema,
   INTAKE_LIMITS,
   IntakeFormSchema,
   TimeframeSchema,
   type Constraints,
+  type GenerationResult,
   type IntakeForm,
   type Timeframe,
 } from "@/lib/schema";
+
+// Everything the results view needs, handed up on a successful generation.
+export interface GenerationHandoff {
+  result: GenerationResult;
+  ruleFlags: Flag[];
+  form: IntakeForm;
+}
+
+function errorMessage(body: unknown): string {
+  if (typeof body === "object" && body !== null && "error" in body) {
+    const message = (body as { error: unknown }).error;
+    if (typeof message === "string") return message;
+  }
+  return "Generation failed — try again.";
+}
 
 // The only persistence in v1 (spec §8): restore my last inputs.
 const STORAGE_KEY = "pm-copilot:last-inputs";
@@ -188,12 +205,17 @@ function FieldShell({
   );
 }
 
-export default function IntakeForm() {
+export default function IntakeForm({
+  onGenerated,
+}: {
+  onGenerated: (generation: GenerationHandoff) => void;
+}) {
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [loaded, setLoaded] = useState(false);
   const [touched, setTouched] = useState<ReadonlySet<keyof IntakeForm>>(new Set());
   const [showErrors, setShowErrors] = useState(false);
-  const [submitState, setSubmitState] = useState<"idle" | "ready">("idle");
+  const [pending, setPending] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -241,22 +263,55 @@ export default function IntakeForm() {
   }, [intake, showErrors]);
 
   const setField = <K extends keyof Draft>(key: K, value: Draft[K]) => {
-    setSubmitState("idle");
+    setApiError(null);
     setDraft((d) => ({ ...d, [key]: value }));
   };
 
   const touch = (field: keyof IntakeForm) =>
     setTouched((prev) => (prev.has(field) ? prev : new Set(prev).add(field)));
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (pending) return;
     setTouched(new Set(ALL_FIELDS));
-    if (!IntakeFormSchema.safeParse(intake).success) {
+    const parsedForm = IntakeFormSchema.safeParse(intake);
+    if (!parsedForm.success) {
       setShowErrors(true);
       return;
     }
     setShowErrors(false);
-    setSubmitState("ready"); // M4 wires this to POST /api/generate + results view.
+    setApiError(null);
+    setPending(true);
+    // The fired rule checks ride along so the model doesn't waste critique
+    // slots duplicating what the rules already caught (spec §3).
+    const ruleFlags = runChecks(parsedForm.data);
+    try {
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          form: parsedForm.data,
+          fired_check_ids: ruleFlags.map((flag) => flag.id),
+        }),
+      });
+      const body: unknown = await response.json();
+      if (!response.ok) {
+        setApiError(errorMessage(body));
+        return;
+      }
+      // The server already validated, but re-parse here so nothing unvalidated
+      // can ever reach the results view, whatever the route does in future.
+      const result = GenerationResultSchema.safeParse(body);
+      if (!result.success) {
+        setApiError("The model returned something malformed — try again");
+        return;
+      }
+      onGenerated({ result: result.data, ruleFlags, form: parsedForm.data });
+    } catch {
+      setApiError("Network error — check your connection and try again.");
+    } finally {
+      setPending(false);
+    }
   }
 
   const flagsFor = (field: keyof IntakeForm) => visibleFlags.filter((f) => f.field === field);
@@ -549,18 +604,23 @@ export default function IntakeForm() {
             — Generate anyway, or tighten first?
           </div>
         )}
-        {/* Advise, never block (spec §0.2): the button is always enabled. */}
+        {apiError && (
+          <div
+            role="alert"
+            className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {apiError}
+          </div>
+        )}
+        {/* Advise, never block (spec §0.2): flags never disable the button —
+            it is only inert while a request is already in flight. */}
         <button
           type="submit"
-          className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-zinc-900 px-6 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 sm:w-auto"
+          disabled={pending}
+          className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-zinc-900 px-6 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
         >
-          Generate
+          {pending ? "Generating…" : "Generate"}
         </button>
-        {submitState === "ready" && (
-          <p className="mt-3 text-sm text-zinc-500">
-            Inputs are valid. The results view arrives in M4.
-          </p>
-        )}
       </div>
     </form>
   );
