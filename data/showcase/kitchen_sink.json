@@ -1,0 +1,129 @@
+{
+  "prd": {
+    "summary": "CampusHub consolidates campus events and study-group matching for commuter students. MVP tests whether commuters will adopt an all-in-one app over single-purpose tools.",
+    "problem_statement": "Commuter students today learn about campus events through scattered channels (email, flyers, multiple apps) and often miss them entirely; 31 of 40 surveyed commuters reported hearing about events after they've ended. Finding study partners requires manual coordination or sketchy off-campus groups. This fragmentation reduces campus engagement and social connection for students who leave campus early.",
+    "target_user": {
+      "who": "Commuter students at large public universities who spend 6+ hours on campus per week",
+      "situation": "Between classes or during breaks, looking for events, study partners, or campus resources but unaware of what's happening or how to find peers with matching schedules"
+    },
+    "mvp": {
+      "in_scope": [
+        {
+          "item": "Personalized events feed (campus-wide calendar aggregation + push notifications)",
+          "rationale": "Directly addresses the stated pain: 78% of surveyed users miss events due to fragmentation. Tests whether students will open a new app for discovery. Smallest surface to validate adoption."
+        },
+        {
+          "item": "Study-group matching by course and schedule",
+          "rationale": "Second-highest friction point; requires no marketplace infrastructure or moderation. Validates the core assumption that students will switch apps for convenience. Low operational overhead for a 2–3 person team."
+        },
+        {
+          "item": "Basic user onboarding and course enrollment flow",
+          "rationale": "Required to power study matching and personalization. Establishes the foundation for future features without expanding scope."
+        }
+      ],
+      "out_of_scope": [
+        {
+          "item": "Used textbook and furniture marketplace",
+          "reason": "Requires vendor management, payment processing, and dispute resolution. A 2–3 person team cannot ship, moderate, and support a marketplace in a quarter while building core features.",
+          "revisit_when": "Marketplace adoption reaches 10% of active users and team grows to 4+"
+        },
+        {
+          "item": "Campus food pickup and delivery",
+          "reason": "Requires restaurant integrations, logistics coordination, and real-time inventory. Outside core competency; existing services (DoorDash, Uber Eats) already solve this for campus.",
+          "revisit_when": "Events and study matching show 40%+ weekly retention and food vendors request integration"
+        },
+        {
+          "item": "Anonymous forum for questions and confessions",
+          "reason": "Requires content moderation at scale and community management. Deferred to avoid distraction from adoption metrics and to prevent moderation burden on small team.",
+          "revisit_when": "Core features reach 20% of target user base and moderation SOP is documented"
+        }
+      ]
+    },
+    "success_metrics": [
+      {
+        "metric": "Weekly active commuter students at pilot campus",
+        "target": "25% of enrolled commuters",
+        "timeframe": "End of Q1 (12 weeks)",
+        "kind": "primary"
+      },
+      {
+        "metric": "Week 4 repeat-use rate (students active in weeks 1 and 4)",
+        "target": "≥40%",
+        "timeframe": "End of Q1",
+        "kind": "guardrail"
+      },
+      {
+        "metric": "Events discovered via CampusHub that users attend",
+        "target": "≥2 per active user per month",
+        "timeframe": "End of Q1",
+        "kind": "guardrail"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Commuters may not open a new app if existing single-purpose tools (Facebook, GroupMe, Eventbrite) already serve their needs.",
+        "severity": "high",
+        "mitigation": "Launch with push notifications for events matching user interests; measure week-1 vs. week-4 retention to detect early churn. If week-4 retention <30%, pivot to a web-first or SMS-first distribution model."
+      },
+      {
+        "risk": "Study-group matching fails if course enrollment data is incomplete or students don't input their schedules.",
+        "severity": "med",
+        "mitigation": "Require course enrollment during onboarding (pull from university registrar API if available; fall back to manual entry). A/B test incentives (e.g., 'complete your schedule to unlock matches') to drive completion."
+      },
+      {
+        "risk": "Pilot campus selection bias: if chosen campus is unusually engaged or tech-forward, results won't generalize.",
+        "severity": "med",
+        "mitigation": "Select a campus with below-median student tech adoption and above-median commuter population. Document campus demographics and compare to national averages before scaling."
+      }
+    ],
+    "open_questions": [
+      "Riskiest assumption (proposed): Will commuters actually switch from single-purpose apps they already use to an all-in-one, or will CampusHub become a secondary app they check once per week?",
+      "Does the target university have a registrar API or student directory we can integrate for course enrollment, or must we rely on manual entry?",
+      "What is the baseline weekly active rate for existing campus apps (e.g., official university app, GroupMe) at the pilot campus?"
+    ],
+    "next_release": [
+      "Used textbook and furniture marketplace (deferred pending 10% marketplace adoption and team growth)",
+      "Campus food pickup and delivery integration (deferred pending 40% retention and vendor requests)",
+      "Anonymous forum and community Q&A (deferred pending 20% user base and moderation SOP)"
+    ]
+  },
+  "critique": {
+    "flags": [
+      {
+        "section": "metric",
+        "severity": "warn",
+        "issue": "Primary metric measures adoption, not engagement or habit formation.",
+        "why_it_matters": "25% weekly active by end of Q1 can be driven by novelty; if week-4 retention is 20%, the feature is failing even if the headline metric hits.",
+        "suggested_fix": "Keep the 25% target as primary, but add a mandatory guardrail: week-4 repeat-use rate ≥40%, or the feature is considered at-risk regardless of WAU."
+      },
+      {
+        "section": "problem",
+        "severity": "info",
+        "issue": "Evidence is self-selected (your old commuter group chat), not representative.",
+        "why_it_matters": "31 of 40 respondents may skew toward students already engaged in campus community; silent majority of commuters may not care about events at all.",
+        "suggested_fix": "Before launch, survey a random sample of 100+ commuters at the pilot campus on event awareness and study-partner friction; use that to validate or revise the problem."
+      },
+      {
+        "section": "scope",
+        "severity": "warn",
+        "issue": "iOS-only launch is a hard constraint, not a choice, but the PRD doesn't state it.",
+        "why_it_matters": "Commuters may use Android; launching on one platform risks excluding a segment of the target user and inflating churn if they can't access the app.",
+        "suggested_fix": "Explicitly commit to iOS-only for MVP with a clear Android deferral trigger (e.g., 'if iOS retention >35% by week 8, ship Android in Q2'). Measure Android demand during pilot."
+      },
+      {
+        "section": "user",
+        "severity": "info",
+        "issue": "Target user is broad ('commuter students at large public universities'); no geographic or demographic narrowing.",
+        "why_it_matters": "Commuter behavior varies widely by region, campus size, and socioeconomic factors; a pilot at one campus may not predict success at another.",
+        "suggested_fix": "Narrow the target to 'commuter students at [specific campus] with 6+ hours on campus per week' for the MVP, and document why that campus was chosen (e.g., high commuter %, below-median tech adoption)."
+      }
+    ],
+    "strongest_element": "The riskiest assumption is explicit and the MVP is designed to test it: events + study matching directly address the fragmentation pain, and the deferral of marketplace and food delivery shows discipline in cutting scope to fit a 2–3 person team in a quarter.",
+    "weakest_element": "The success metric conflates adoption with retention; 25% WAU is a vanity metric if week-4 repeat use collapses, and the intake provides no baseline for what 'good' looks like at a comparable campus."
+  },
+  "meta": {
+    "generated_at": "2026-07-17T22:11:42.786Z",
+    "model": "claude-haiku-4-5",
+    "input_hash": "c2b6403ac48dc2d946c9c5b6749d5f25f1ec966e89fe9dc192d9c8065d4112a5"
+  }
+}

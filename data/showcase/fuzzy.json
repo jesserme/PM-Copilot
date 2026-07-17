@@ -1,0 +1,129 @@
+{
+  "prd": {
+    "summary": "AI-driven workout coach that generates personalized plans and adapts them based on user progress, targeting users who abandon fitness apps within weeks.",
+    "problem_statement": "Today, users download fitness apps with intent to exercise but quit within 2–3 weeks because generic workout plans feel disconnected from their actual progress, goals, and constraints. The cost is churn and low lifetime value for the app.",
+    "target_user": {
+      "who": "A user aged 25–40 with some fitness awareness (has tried an app or gym before) who owns a smartphone.",
+      "situation": "The moment they decide to start a fitness routine but lack a structured plan or the motivation to stick to a generic one."
+    },
+    "mvp": {
+      "in_scope": [
+        {
+          "item": "AI generates one personalized workout plan on signup based on stated goal, fitness level, and available equipment.",
+          "rationale": "Tests the riskiest assumption: whether users perceive a personalized plan as meaningfully different from generic plans and whether they engage with it. Solo team cannot ship plan adaptation, analytics, and onboarding in parallel; this tests the core value before building the feedback loop."
+        },
+        {
+          "item": "User can log workout completion (yes/no, no rep/weight tracking).",
+          "rationale": "Minimal signal to measure engagement and retention. Enables the next phase (adaptation) without requiring a complex logging UI."
+        },
+        {
+          "item": "Mobile app (iOS or Android, not both).",
+          "rationale": "Solo team cannot maintain two platforms. Pick one based on target user device prevalence; defer the other to next release."
+        }
+      ],
+      "out_of_scope": [
+        {
+          "item": "Adaptive plan adjustment based on logged workouts.",
+          "reason": "Requires analytics pipeline, ML retraining, and A/B testing. Solo team cannot ship personalization, logging, and adaptation in one cycle.",
+          "revisit_when": "After measuring whether users log workouts consistently (>60% of plan adherence) for 2+ weeks."
+        },
+        {
+          "item": "Rep/weight/duration tracking and form feedback.",
+          "reason": "Demands computer vision or detailed logging UX; adds complexity without testing whether personalization alone drives retention.",
+          "revisit_when": "After confirming that basic plan personalization reduces churn below 50% by week 3."
+        },
+        {
+          "item": "Social features, challenges, or leaderboards.",
+          "reason": "Orthogonal to the core hypothesis; adds scope without testing whether the AI plan itself is the retention lever.",
+          "revisit_when": "After establishing a stable, engaged user base with >40% week-4 retention."
+        }
+      ]
+    },
+    "success_metrics": [
+      {
+        "metric": "Week-3 retention (% of users who log at least one workout in week 3)",
+        "target": "≥40%",
+        "timeframe": "end of first month post-launch",
+        "kind": "primary"
+      },
+      {
+        "metric": "App downloads",
+        "target": null,
+        "timeframe": "quarter",
+        "kind": "guardrail"
+      },
+      {
+        "metric": "Average workouts logged per active user per week",
+        "target": "≥2",
+        "timeframe": "weeks 2–4",
+        "kind": "guardrail"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Users perceive the AI plan as generic or not meaningfully different from existing apps.",
+        "severity": "high",
+        "mitigation": "Before launch, show the generated plan to 5–10 target users and ask them to compare it to a plan from a competitor app (e.g., Strong, Nike Training Club). If >50% say it feels generic, revisit the personalization logic before shipping."
+      },
+      {
+        "risk": "Logging friction causes users to abandon the app before we can measure retention.",
+        "severity": "med",
+        "mitigation": "A/B test two logging UIs (single-tap yes/no vs. a form) with the first 500 users. If yes/no has >20% higher completion rate, ship that; otherwise iterate."
+      },
+      {
+        "risk": "Solo developer burnout or illness halts progress mid-sprint.",
+        "severity": "med",
+        "mitigation": "Scope the MVP to a 10-day build + 4-day testing buffer. If slippage occurs, cut adaptive adjustment and ship plan generation + logging only."
+      }
+    ],
+    "open_questions": [
+      "Riskiest assumption (proposed): Does personalization of the initial plan alone (without adaptation) reduce churn, or is ongoing adaptation required to drive retention?",
+      "What is the target user's device OS distribution (iOS vs. Android)? This determines which platform to build first.",
+      "What specific personalization dimensions matter most: goal (weight loss, strength, endurance), fitness level, or equipment availability?"
+    ],
+    "next_release": [
+      "Adaptive plan adjustment based on logged workout data and user feedback.",
+      "Rep, weight, and duration tracking with form feedback (video or text cues).",
+      "Social features: challenges, leaderboards, or coach messaging."
+    ]
+  },
+  "critique": {
+    "flags": [
+      {
+        "section": "problem",
+        "severity": "warn",
+        "issue": "No evidence that personalization is the retention lever.",
+        "why_it_matters": "The intake assumes users quit because plans are generic, but churn could stem from time constraints, injury, or lack of accountability—none of which personalization alone fixes.",
+        "suggested_fix": "Add a research note: 'Assumption: users quit because plans don't match their goals/equipment, not because of time or accountability barriers.' Then design the MVP to test this explicitly (e.g., ask churned users why they quit)."
+      },
+      {
+        "section": "metric",
+        "severity": "warn",
+        "issue": "Primary metric (downloads) is decoupled from the problem (retention).",
+        "why_it_matters": "Downloads can grow while retention collapses; the metric does not measure whether personalization solves the stated churn problem.",
+        "suggested_fix": "Replace primary metric with week-3 retention (% of users who log a workout in week 3). Keep downloads as a guardrail to track growth, but make retention the north star."
+      },
+      {
+        "section": "scope",
+        "severity": "info",
+        "issue": "Platform choice (iOS vs. Android) is deferred but not decided.",
+        "why_it_matters": "A solo developer cannot ship both in the MVP window; picking one now unblocks design and backend decisions.",
+        "suggested_fix": "Add a decision: 'Platform: [iOS or Android] based on [target user device data or team preference].' Defer the other to next release."
+      },
+      {
+        "section": "user",
+        "severity": "info",
+        "issue": "Target user is too broad ('everyone who wants to get in shape').",
+        "why_it_matters": "Personalization strategy, onboarding, and messaging differ wildly between a beginner and an athlete; the MVP cannot serve both equally well.",
+        "suggested_fix": "Narrow to one segment for MVP (e.g., 'fitness beginners aged 25–40 who have tried an app or gym before'). Expand after validating retention with that cohort."
+      }
+    ],
+    "strongest_element": "The MVP scope is disciplined: plan generation + logging tests the core hypothesis (personalization drives retention) without overcommitting to adaptation or tracking, which is appropriate for a solo team on a tight timeline.",
+    "weakest_element": "The success metric is a vanity measure (downloads) that does not validate the problem statement (churn); the intake conflates growth with retention and leaves the riskiest assumption (whether personalization alone is sufficient) untested."
+  },
+  "meta": {
+    "generated_at": "2026-07-17T22:11:00.296Z",
+    "model": "claude-haiku-4-5",
+    "input_hash": "3b30f667dbc824f4e5b1ac67d027101d30764bd246ed19204de2d267e77484e6"
+  }
+}

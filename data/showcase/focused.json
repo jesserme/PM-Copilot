@@ -1,0 +1,132 @@
+{
+  "prd": {
+    "summary": "Reusable reply templates with auto-fill variables inside the seller inbox, enabling solo shop owners to send consistent answers to repetitive buyer questions in two clicks.",
+    "problem_statement": "Solo shop owners answer the same five questions (shipping time, sizing, customization, returns, delays) dozens of times per week. Today they copy-paste from Notes or retype from memory, which is slow, error-prone, and produces inconsistent answers that appear in negative reviews.",
+    "target_user": {
+      "who": "Solo Etsy-style shop owners",
+      "situation": "Handling 20+ buyer conversations per day and fielding repetitive questions about shipping, sizing, customization, returns, and delays"
+    },
+    "mvp": {
+      "in_scope": [
+        {
+          "item": "Templates drawer in inbox UI with save-as-template and insert-template actions",
+          "rationale": "Tests whether sellers will adopt the core workflow (capture and reuse) and whether two-click insertion is fast enough to displace copy-paste behavior."
+        },
+        {
+          "item": "Auto-fill variables for buyer name and order number only",
+          "rationale": "Minimizes implementation scope for a two-person team in one release cycle; tests whether basic personalization is sufficient to avoid 'impersonal' perception."
+        },
+        {
+          "item": "Five starter templates covering the five most-cited repetitive questions (shipping, sizing, customization, returns, delays)",
+          "rationale": "Reduces friction for first-time users and validates that the problem is real; sellers can immediately measure time saved against their current workflow."
+        }
+      ],
+      "out_of_scope": [
+        {
+          "item": "Custom variables beyond buyer name and order number (e.g., shop name, product SKU, shipping carrier)",
+          "reason": "Scope creep for a two-person team; each new variable adds UI, backend, and testing complexity.",
+          "revisit_when": "After measuring adoption of basic templates and identifying the next-highest-value variable from usage data."
+        },
+        {
+          "item": "Template categories, search, or tagging",
+          "reason": "Premature organization; five starter templates do not require categorization. Adds UI complexity that delays launch.",
+          "revisit_when": "When the seller has created 10+ custom templates and reports difficulty finding them."
+        },
+        {
+          "item": "Mobile app support",
+          "reason": "Constraint specifies web platform only; mobile adds platform-specific overhead. Sellers can use web on mobile browser.",
+          "revisit_when": "After web launch stabilizes and mobile usage is measured via analytics."
+        },
+        {
+          "item": "Template sharing or marketplace-curated library",
+          "reason": "Introduces moderation, privacy, and legal complexity. Not validated as a user need yet.",
+          "revisit_when": "After interviews reveal sellers asking for this or competitive pressure emerges."
+        },
+        {
+          "item": "Analytics dashboard and template performance insights",
+          "reason": "Nice-to-have instrumentation; does not unblock core value. Telemetry for success metric can be added post-launch.",
+          "revisit_when": "After MVP launch, if the team wants to optimize template content or measure ROI."
+        }
+      ]
+    },
+    "success_metrics": [
+      {
+        "metric": "Share of replies sent via template among sellers active in week 2",
+        "target": "40%",
+        "timeframe": "6 weeks",
+        "kind": "primary"
+      },
+      {
+        "metric": "Seller retention (active in week 6 vs. week 1) among template users",
+        "target": null,
+        "timeframe": "6 weeks",
+        "kind": "guardrail"
+      },
+      {
+        "metric": "Net Promoter Score or qualitative feedback on template experience (impersonality concern)",
+        "target": null,
+        "timeframe": "6 weeks",
+        "kind": "guardrail"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Sellers perceive templated replies as impersonal or brand-damaging in a 'handmade' marketplace, leading to low adoption or negative buyer feedback.",
+        "severity": "high",
+        "mitigation": "Conduct a small qualitative test (5–10 sellers) in week 1: have them send 2–3 templated replies and ask buyers for feedback on tone. If buyers flag impersonality, pivot to a 'template + personal note' UI before full rollout."
+      },
+      {
+        "risk": "Five starter templates do not match the actual top questions sellers receive, reducing perceived relevance and adoption.",
+        "severity": "med",
+        "mitigation": "Validate the five questions against the 12 seller interviews and forum threads before finalizing template text. If interviews reveal different top questions, rewrite templates to match."
+      },
+      {
+        "risk": "Auto-fill variables fail or insert wrong data (e.g., buyer name from previous order), eroding trust in the feature.",
+        "severity": "high",
+        "mitigation": "Implement unit tests for variable substitution and a manual QA pass on 20 templated replies before launch. Add a preview step before send so sellers can verify correctness."
+      }
+    ],
+    "open_questions": [
+      "Riskiest assumption (proposed): Buyers will not perceive templated replies as impersonal. How will you validate this before full rollout?",
+      "What are the exact five questions from the 12 seller interviews? (Needed to finalize starter template text.)",
+      "Will sellers be able to edit a template after inserting it, or must they send as-is?"
+    ],
+    "next_release": [
+      "Custom variables (SKU, shipping carrier, shop name) once usage data identifies the next-highest-value variable.",
+      "Template categories and search when sellers have created 10+ custom templates.",
+      "Mobile app support after web launch stabilizes."
+    ]
+  },
+  "critique": {
+    "flags": [
+      {
+        "section": "metric",
+        "severity": "warn",
+        "issue": "Primary metric measured too early; week-2 adoption inflated by novelty.",
+        "why_it_matters": "A 40% share in week 2 may collapse by week 6 if templates don't solve the real problem or feel impersonal. You won't know if the feature actually works until repeat behavior stabilizes.",
+        "suggested_fix": "Move the primary metric to week 4 or week 6, or add a guardrail for week-6 retention to catch novelty collapse."
+      },
+      {
+        "section": "problem",
+        "severity": "info",
+        "issue": "Evidence is strong but recency and sample details should be stated.",
+        "why_it_matters": "If interviews were conducted in June and it's now much later, market conditions may have shifted. Readers need to know how fresh the data is.",
+        "suggested_fix": "Add the current date or 'conducted in June' to the problem statement so the team can assess staleness during execution."
+      },
+      {
+        "section": "scope",
+        "severity": "warn",
+        "issue": "Starter templates are not validated; five questions may not match seller reality.",
+        "why_it_matters": "If the five starter templates don't address the actual top questions, sellers won't use them, and the 40% target will miss. You're shipping content you haven't validated.",
+        "suggested_fix": "Before finalizing template text, extract the exact five questions from the 12 interviews and forum threads and confirm they match the proposed templates."
+      }
+    ],
+    "strongest_element": "The riskiest assumption is explicit and testable: 'Buyers won't read templated replies as impersonal.' This shows the team has identified the core threat to adoption and can design a validation plan around it.",
+    "weakest_element": "The success metric is measured in week 2, which captures novelty adoption but not sustained behavior change or the impersonality risk. A 40% share in week 2 tells you nothing about whether the feature survives week 6."
+  },
+  "meta": {
+    "generated_at": "2026-07-17T22:10:24.454Z",
+    "model": "claude-haiku-4-5",
+    "input_hash": "ce789e79dc83ec86476779911baa50117cb62b3eea378b59a0776ab08290f680"
+  }
+}

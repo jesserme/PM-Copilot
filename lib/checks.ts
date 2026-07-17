@@ -1,4 +1,7 @@
-import { INTAKE_LIMITS, type IntakeForm } from "./schema";
+// Explicit .ts extension so scripts/pregenerate.ts can run this module under
+// Node's native TypeScript support (extensionless relative imports are a
+// bundler-only convenience).
+import { INTAKE_LIMITS, type IntakeForm } from "./schema.ts";
 
 // Deterministic check layer — spec §2. Pure functions, (form) => Flag[]:
 // no React, no side effects. Runs client-side on field blur and on submit.
