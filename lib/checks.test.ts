@@ -9,7 +9,17 @@ import {
   vagueAudience,
   vanityMetric,
 } from "./checks";
-import { INTAKE_LIMITS, type IntakeForm } from "./schema";
+import {
+  GenerationResultSchema,
+  INTAKE_LIMITS,
+  IntakeFormSchema,
+  type IntakeForm,
+} from "./schema";
+
+import focusedShowcase from "../data/showcase/focused.json";
+import fuzzyShowcase from "../data/showcase/fuzzy.json";
+import kitchenSinkShowcase from "../data/showcase/kitchen_sink.json";
+import showcaseInputs from "../showcase-inputs.json";
 
 // A deliberately strong input: no check should fire on it (spec §0.5 — honest
 // critique only; a strong input gets no fabricated flags).
@@ -254,5 +264,20 @@ describe("runChecks", () => {
       no_evidence: "info",
       no_assumption: "info",
     });
+  });
+});
+
+// M5 ruling 3: the committed showcase results must stay in sync with the rule
+// layer. If a check's behavior changes, these fail until the showcase is
+// regenerated (or re-backfilled with a logged justification in DECISIONS.md).
+describe("showcase drift guard", () => {
+  it.each([
+    ["focused", focusedShowcase],
+    ["fuzzy", fuzzyShowcase],
+    ["kitchen_sink", kitchenSinkShowcase],
+  ] as const)("%s: committed fired_check_ids match runChecks on its input", (key, committed) => {
+    const form = IntakeFormSchema.parse((showcaseInputs as Record<string, unknown>)[key]);
+    const result = GenerationResultSchema.parse(committed);
+    expect(runChecks(form).map((flag) => flag.id)).toEqual(result.meta.fired_check_ids);
   });
 });

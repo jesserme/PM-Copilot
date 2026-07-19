@@ -13,6 +13,20 @@ export const INTAKE_LIMITS = {
   riskiest_assumption: 200,
 } as const;
 
+// Deterministic check ids (spec §2). Defined here rather than in checks.ts
+// because meta.fired_check_ids (spec §4, erratum 5) makes them part of the
+// output contract; checks.ts re-exports them for the rule layer.
+export const CHECK_IDS = [
+  "vague_audience",
+  "vanity_metric",
+  "no_target",
+  "no_evidence",
+  "no_assumption",
+  "kitchen_sink",
+] as const;
+
+export type CheckId = (typeof CHECK_IDS)[number];
+
 // ---------------------------------------------------------------------------
 // Intake schema — spec §1
 // ---------------------------------------------------------------------------
@@ -114,6 +128,10 @@ export const MetaSchema = z.object({
   generated_at: z.iso.datetime(),
   model: z.string(),
   input_hash: z.string(),
+  // Drift guard (spec §4, erratum 5): the rule checks that fired for this
+  // input, recorded at generation time so stored results stay auditable
+  // against the current rule layer.
+  fired_check_ids: z.array(z.enum(CHECK_IDS)),
 });
 
 export const GenerationResultSchema = z.object({

@@ -208,6 +208,9 @@ export async function POST(request: Request) {
       generated_at: new Date().toISOString(),
       model: MODEL_ID,
       input_hash: createHash("sha256").update(JSON.stringify(form)).digest("hex"),
+      // Drift guard (erratum 5): record which rule checks fired at generation
+      // time, so stored results are auditable against the rule layer later.
+      fired_check_ids,
     },
   };
 

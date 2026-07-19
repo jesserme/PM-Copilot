@@ -27,7 +27,15 @@ const inputs = JSON.parse(
 ) as Record<string, unknown>;
 
 // Keys starting with _ are documentation, not inputs (see the file's _note).
-const entries = Object.entries(inputs).filter(([key]) => !key.startsWith("_"));
+// Pass key names as arguments to regenerate a subset, e.g.:
+//   node scripts/pregenerate.ts kitchen_sink
+const requested = process.argv.slice(2);
+const entries = Object.entries(inputs).filter(
+  ([key]) => !key.startsWith("_") && (requested.length === 0 || requested.includes(key)),
+);
+if (requested.length > 0 && entries.length !== requested.length) {
+  throw new Error(`Unknown showcase key(s): ${requested.join(", ")}`);
+}
 
 mkdirSync(OUT_DIR, { recursive: true });
 

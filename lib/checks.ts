@@ -1,22 +1,16 @@
 // Explicit .ts extension so scripts/pregenerate.ts can run this module under
 // Node's native TypeScript support (extensionless relative imports are a
 // bundler-only convenience).
-import { INTAKE_LIMITS, type IntakeForm } from "./schema.ts";
+import { INTAKE_LIMITS, type CheckId, type IntakeForm } from "./schema.ts";
+
+// Check ids live in schema.ts (they are part of the §4 output contract via
+// meta.fired_check_ids); re-exported here so the rule layer keeps one import.
+export { CHECK_IDS } from "./schema.ts";
+export type { CheckId } from "./schema.ts";
 
 // Deterministic check layer — spec §2. Pure functions, (form) => Flag[]:
 // no React, no side effects. Runs client-side on field blur and on submit.
 // User-facing messages are shipped verbatim from the spec — do not rephrase.
-
-export const CHECK_IDS = [
-  "vague_audience",
-  "vanity_metric",
-  "no_target",
-  "no_evidence",
-  "no_assumption",
-  "kitchen_sink",
-] as const;
-
-export type CheckId = (typeof CHECK_IDS)[number];
 
 export type FlagSeverity = "info" | "warn";
 

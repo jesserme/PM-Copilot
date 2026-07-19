@@ -127,6 +127,7 @@
   "meta": {
     "generated_at": "2026-07-17T22:10:24.454Z",
     "model": "claude-haiku-4-5",
-    "input_hash": "ce789e79dc83ec86476779911baa50117cb62b3eea378b59a0776ab08290f680"
+    "input_hash": "ce789e79dc83ec86476779911baa50117cb62b3eea378b59a0776ab08290f680",
+    "fired_check_ids": []
   }
 }

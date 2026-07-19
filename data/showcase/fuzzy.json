@@ -124,6 +124,13 @@
   "meta": {
     "generated_at": "2026-07-17T22:11:00.296Z",
     "model": "claude-haiku-4-5",
-    "input_hash": "3b30f667dbc824f4e5b1ac67d027101d30764bd246ed19204de2d267e77484e6"
+    "input_hash": "3b30f667dbc824f4e5b1ac67d027101d30764bd246ed19204de2d267e77484e6",
+    "fired_check_ids": [
+      "vague_audience",
+      "vanity_metric",
+      "no_target",
+      "no_evidence",
+      "no_assumption"
+    ]
   }
 }

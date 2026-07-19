@@ -7,6 +7,8 @@ Format per spec §7: **decision → alternatives considered → why → revisit 
 1. **2026-07-12 — §1 required-field count.** Prose said "Nine fields, five required"; the field table and the TS interface both mark six fields required (`success_metric` carries the ✅). Corrected the prose to "six required." The table was right, the prose was not.
 2. **2026-07-12 — §2 `vanity_metric` case sensitivity.** Shipped behavior matches both patterns case-insensitively (judgment call 2). Spec table row left as written — the bare patterns there read as illustrative, not as a case-sensitivity mandate.
 3. **2026-07-16 — §2 `kitchen_sink` trigger.** The clause-splitting trigger ("joins ≥ 3 clauses with 'and'/commas") false-positived on prose enumerations, including two of the three showcase inputs. Spec table row replaced with the comma-count trigger (≥ 4 commas, or ≥ 3 commas and a ":"); the > 90%-length trigger, severity, and user-facing message are unchanged. See decision 11.
+4. **2026-07-19 — §6 Focused showcase row.** Expectation updated from "1–2 info flags, positive verdict" to "≤3 legitimate flags, zero RULE chips, verdict opens with specific praise" — the calibration promise updated to match committed evidence. See decision 12.
+5. **2026-07-19 — §4 `meta` gains `fired_check_ids`.** The rule checks that fired for an input are recorded in the output at generation time, as the showcase drift guard. See decision 14.
 
 ## M1 judgment calls
 
@@ -90,3 +92,40 @@ Format per spec §7: **decision → alternatives considered → why → revisit 
 - **Alternatives considered:** Keep the v1 clause-splitting trigger (false-positives on showcase prose); reword the showcase solutions to dodge the trigger (hides the bug and edits product fixtures to fit a heuristic).
 - **Why:** The rule layer is tuned for precision because the costs are asymmetric: a false RULE chip presents itself as deterministic fact and erodes the credibility the panel is built on, while a missed enumeration is backstopped by the model layer, which owns semantic scope judgment — and since the model receives the fired-ids list, an un-fired `kitchen_sink` leaves it free to raise scope itself. " and " is removed as a signal because prose conjunctions are overwhelmingly benign connectors, not feature seams.
 - **Revisit when:** Real inputs show list-style solutions with ≤ 3 commas slipping past both layers, or the corpus gains cases the comma rule cannot separate.
+
+## M5 rulings
+
+### 12. Focused output kept; calibration promises follow evidence
+
+- **Decision:** The committed `focused.json` stays as generated (3 legitimate flags, 2 warn). The spec §6 row was updated to match (erratum 4) rather than the output re-rolled to match the promise.
+- **Alternatives considered:** Re-roll until an output matches the old "1–2 info flags" promise.
+- **Why:** Calibration promises get updated by evidence; committed outputs are never re-rolled for taste. Cherry-picking generations until they flatter the marketing would quietly undermine the honest-critique brand the panel sells.
+- **Revisit when:** Model calibration drifts enough that "legitimate" no longer describes the Focused flags.
+
+### 13. Constraints-fidelity rule; kitchen_sink regenerated under audit
+
+- **Decision:** The system prompt's field guidance gains: "Constraints fidelity: reference platform, team size, and timeline exactly as the intake states them; never assume one that isn't given." `kitchen_sink.json` was regenerated through the same pregenerate path, and every model flag in the new output was audited against the raw input before committing — all passed; the new scope flag quotes `'both'` and "2–3 person team" exactly as stated.
+- **Alternatives considered:** Hand-edit the committed JSON (falsifies provenance); leave the fabricated flag.
+- **Why:** The prior roll's flag ("iOS-only launch is a hard constraint") cited a constraint the input never stated — a hard-rule-1 violation sitting in the portfolio's front window.
+- **Revisit when:** Any future output's flag cites a fact absent from its input.
+
+### 14. Drift guard: `fired_check_ids` recorded in `meta`
+
+- **Decision:** `/api/generate` appends the request's `fired_check_ids` to `meta` (erratum 5). The three committed showcase files were backfilled with today's `runChecks` output — valid because no rule changes landed between their generation and the backfill. A test asserts, per showcase pair, `runChecks(input)` equals the committed `meta.fired_check_ids`.
+- **Alternatives considered:** Recompute-only at render time (drift stays invisible); no guard at all.
+- **Why:** Committed results embed the rule layer's behavior at generation time; recording it makes drift fail in CI instead of surfacing in a production demo.
+- **Revisit when:** A rule change is intentional — regenerate the showcase, or re-backfill with a logged justification here.
+
+### 15. "Back to samples" link (M5 addition, approved)
+
+- **Decision:** The form view carries a small "← Back to samples" link whenever showcase data is present.
+- **Alternatives considered:** No path back (the spec is silent).
+- **Why:** With showcase as the default landing view, returning to it is basic navigation, not a feature addition.
+- **Revisit when:** Navigation is reworked (e.g., real routes instead of view state).
+
+### 16. Prompt promoted to `lib/prompt-text.ts`; markdown is documentation
+
+- **Decision:** `SYSTEM_PROMPT` and `USER_MESSAGE_TEMPLATE` are exported consts and the single runtime source; `app-system-prompt.md` carries a pointer header and mirrors the content for reading. No runtime fs reads of markdown.
+- **Alternatives considered:** Keep the fs read and configure serverless file tracing (`outputFileTracingIncludes`) at deploy time.
+- **Why:** Serverless bundling reliability over file-loading purity — every bundler traces module imports; loose files get traced only sometimes, and the failure mode is a 500 in production.
+- **Revisit when:** The prompt grows variants or versions worth loading dynamically.

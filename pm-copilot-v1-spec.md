@@ -153,7 +153,8 @@ One object, one source of truth for the entire results view:
   "meta": {
     "generated_at": "ISO-8601",
     "model": "string",
-    "input_hash": "string"                      // sha of IntakeForm
+    "input_hash": "string",                     // sha of IntakeForm
+    "fired_check_ids": ["string"]               // rule checks that fired (erratum 5, drift guard)
   }
 }
 ```
@@ -188,7 +189,7 @@ Three canned examples, **pre-generated and stored as static JSON** — instant l
 
 | Tab | Input character | What it proves |
 |-----|-----------------|----------------|
-| **"Focused"** | Tight input, real evidence, honest metric | 1–2 info flags, positive verdict — proves the critic doesn't fabricate problems |
+| **"Focused"** | Tight input, real evidence, honest metric | ≤3 legitimate flags, zero RULE chips, verdict opens with specific praise |
 | **"Fuzzy"** ← default tab | Vague audience + vanity metric | The pushback is visible within 5 seconds of page load |
 | **"Kitchen sink"** | Five features crammed into one solution field | A long, reasoned cut list — scope discipline on display |
 
