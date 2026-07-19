@@ -619,8 +619,23 @@ export default function IntakeForm({
           disabled={pending}
           className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-zinc-900 px-6 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
         >
-          {pending ? "Generating…" : "Generate"}
+          {pending ? (
+            <>
+              <span
+                aria-hidden
+                className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+              />
+              Generating…
+            </>
+          ) : (
+            "Generate"
+          )}
         </button>
+        {pending && (
+          <p role="status" className="mt-3 text-sm text-zinc-500">
+            Building the PRD and critique — usually 20–60 seconds.
+          </p>
+        )}
       </div>
     </form>
   );

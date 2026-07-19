@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Machine-specific Claude Code launcher
 .claude/launch.json
+
+.vercel
+.env*

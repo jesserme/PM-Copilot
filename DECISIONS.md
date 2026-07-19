@@ -129,3 +129,12 @@ Format per spec §7: **decision → alternatives considered → why → revisit 
 - **Alternatives considered:** Keep the fs read and configure serverless file tracing (`outputFileTracingIncludes`) at deploy time.
 - **Why:** Serverless bundling reliability over file-loading purity — every bundler traces module imports; loose files get traced only sometimes, and the failure mode is a 500 in production.
 - **Revisit when:** The prompt grows variants or versions worth loading dynamically.
+
+## M6 judgment calls
+
+### 17. Rate limiter fails open into the in-memory fallback
+
+- **Decision:** The Upstash `limit()` call is wrapped in try/catch; on any Redis failure the route logs a server-side warning and degrades to the per-instance in-memory limiter instead of erroring.
+- **Alternatives considered:** Fail closed (reject generation whenever Redis is unreachable) — stricter limiting, but a Redis hiccup or misconfigured token would take the whole feature down, which is exactly what happened on the first production deploy (a read-only Upstash token made every request 500 before hardening).
+- **Why:** For a portfolio demo, availability beats strict quota enforcement; the fallback still applies per-instance friction, and the log line makes the degradation observable. Empirically confirmed on Vercel that the fallback alone is weak (six sequential requests landed on different instances and all passed) — the Upstash path is the real limiter, per BUILD_PROMPT rule 3.
+- **Revisit when:** The app ever fronts a paid quota or abuse becomes real — then fail closed and alert instead.

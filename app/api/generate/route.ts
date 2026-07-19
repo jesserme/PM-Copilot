@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -22,19 +24,49 @@ const GenerateRequestSchema = z.object({
 // ---------------------------------------------------------------------------
 // Rate limiting — 5 generations/hour/IP (spec §3, BUILD_PROMPT rule 3).
 //
-// ⚠️ LOUD WARNING: this is an in-memory Map, which is a WEAK limiter on
+// Primary: @upstash/ratelimit sliding window over Upstash Redis, shared by
+// every serverless instance, when UPSTASH_REDIS_REST_URL/TOKEN are set.
+//
+// ⚠️ Fallback (no Upstash env vars): an in-memory Map — a WEAK limiter on
 // serverless: every instance gets its own Map, so the effective limit is
 // 5/hour/IP *per instance*, and instance recycling resets it entirely. Fine
 // for local dev and honest-user friction; not abuse-resistant in production.
-// Upgrade path: @upstash/ratelimit + Upstash Redis — when
-// UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are provided, replace
-// this Map with Ratelimit.slidingWindow(5, "1 h").
 // ---------------------------------------------------------------------------
 const RATE_LIMIT = 5;
 const WINDOW_MS = 60 * 60 * 1000;
+
+const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+const upstash =
+  upstashUrl && upstashToken
+    ? new Ratelimit({
+        redis: new Redis({ url: upstashUrl, token: upstashToken }),
+        limiter: Ratelimit.slidingWindow(RATE_LIMIT, "1 h"),
+        prefix: "pm-copilot:generate",
+      })
+    : null;
+
 const hitsByIp = new Map<string, number[]>();
 
-function rateLimit(ip: string): { allowed: boolean; retryAfterSeconds: number } {
+async function rateLimit(
+  ip: string,
+): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
+  if (upstash) {
+    try {
+      const { success, reset } = await upstash.limit(ip);
+      return {
+        allowed: success,
+        retryAfterSeconds: success ? 0 : Math.max(1, Math.ceil((reset - Date.now()) / 1000)),
+      };
+    } catch (error) {
+      // Fail open into the per-instance fallback: a Redis outage or a
+      // misconfigured token must degrade limiting, never break generation.
+      console.error(
+        "Upstash rate limit failed; using in-memory fallback:",
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
   const now = Date.now();
   const recent = (hitsByIp.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
   if (recent.length >= RATE_LIMIT) {
@@ -147,7 +179,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const limit = rateLimit(clientIp(request));
+  const limit = await rateLimit(clientIp(request));
   if (!limit.allowed) {
     return NextResponse.json(
       { error: "Rate limit reached — 5 generations per hour. Try again later." },

@@ -111,6 +111,7 @@ export default function PrdView({
       </Section>
 
       <Section id={PRD_ANCHORS.risk} title="Risks" highlighted={lit(PRD_ANCHORS.risk)}>
+        {prd.risks.length === 0 && <p className="text-zinc-400">None identified.</p>}
         <ul className="flex flex-col gap-3">
           {prd.risks.map((risk, index) => (
             <li key={index}>
@@ -133,6 +134,7 @@ export default function PrdView({
         title="Open questions"
         highlighted={lit(PRD_ANCHORS.questions)}
       >
+        {prd.open_questions.length === 0 && <p className="text-zinc-400">None.</p>}
         <ul className="list-disc pl-5">
           {prd.open_questions.map((question, index) => (
             <li key={index} className="mt-1 first:mt-0">
@@ -143,6 +145,7 @@ export default function PrdView({
       </Section>
 
       <Section id={PRD_ANCHORS.next} title="Next release" highlighted={lit(PRD_ANCHORS.next)}>
+        {prd.next_release.length === 0 && <p className="text-zinc-400">Nothing deferred.</p>}
         <ul className="list-disc pl-5">
           {prd.next_release.map((item, index) => (
             <li key={index} className="mt-1 first:mt-0">

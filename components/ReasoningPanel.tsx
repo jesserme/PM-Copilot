@@ -94,6 +94,11 @@ export default function ReasoningPanel({
           {flags.length} {flags.length === 1 ? "flag" : "flags"} · {warnCount}{" "}
           {warnCount === 1 ? "warning" : "warnings"}
         </p>
+        {flags.length === 0 && (
+          <p className="mt-3 rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-500">
+            No flags. The rule checks and the model critique found nothing to push back on.
+          </p>
+        )}
         <ul className="mt-3 flex flex-col gap-2.5">
           {flags.map((flag) => (
             <li key={flag.key}>
